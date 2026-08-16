@@ -1,5 +1,5 @@
 # AI Developer Assistant
-Python project to learn the development AI-powered developer assistant using an LLM.
+Python project to learn the development of an AI-powered developer assistant using LLM.
 
 ## Features
 - Explain code

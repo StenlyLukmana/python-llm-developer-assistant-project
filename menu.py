@@ -10,21 +10,19 @@ def print_menu():
     print("4. Generate tests")
     print("5. Exit")
 
-def main():
+def run_app():
     while True:
         print_menu()
         action = input("Input action: ")
-
-        match action:
-            case "1":
-                explain_code()
-            case "2":
-                find_bugs()
-            case "3":
-                improve_code()
-            case "4":
-                generate_tests()
-            case "5":
-                break
-            case _:
-                print("Invalid.")
+        if action == "1":
+            explain_code()
+        elif action == "2":
+            find_bugs()
+        elif action == "3":
+            improve_code()
+        elif action == "4":
+            generate_tests()
+        elif action == "5":
+            break
+        else:
+            print("Invalid.")

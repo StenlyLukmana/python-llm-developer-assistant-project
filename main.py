@@ -1,3 +1,3 @@
-from menu import main
+from menu import run_app
 
-main()
+run_app()
