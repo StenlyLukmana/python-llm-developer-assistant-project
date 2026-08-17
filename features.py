@@ -1,36 +1,53 @@
 import os
+import groq
 
 from dotenv import load_dotenv
-from groq import Groq
 
 load_dotenv()
-client = Groq(api_key=os.getenv("GROQ_API_KEY"))
-model = "llama-3.1-8b-instant"
+client = groq.Groq(api_key=os.getenv("GROQ_API_KEY"))
+default_model = "llama-3.1-8b-instant"
 
-def llm_api_call(system_prompt: str, user_prompt_template: str):
+def llm_api_call(system_prompt: str, user_prompt_template: str, model: str = default_model):
     code = get_user_input()
-    response = client.chat.completions.create(
-        model=model,
-        messages=[
-            {
-                "role": "system",
-                "content": system_prompt.strip(),
-            },
-            {
-                "role": "user",
-                "content": user_prompt_template.format(code = code).strip(),
-            },
-        ],
-    )
-    print(response.choices[0].message.content + "\n\n")
+    if not code.strip():
+        print("No code detected, please try again.\n\n")
+        return
+    
+    try:
+        response = client.chat.completions.create(
+            model=model,
+            messages=[
+                {
+                    "role": "system",
+                    "content": system_prompt.strip(),
+                },
+                {
+                    "role": "user",
+                    "content": user_prompt_template.format(code = code).strip(),
+                },
+            ],
+        )
+        print(response.choices[0].message.content + "\n\n")
+
+    except groq.APIConnectionError:
+        print("Error: Unable to connect to the API. Please check your connection and try again.\n\n")
+
+    except groq.APITimeoutError:
+        print("Error: Request timed out. Please try again later.\n\n")
+
+    except groq.RateLimitError:
+        print("Error: Limit exceeded. Please wait a moment and try again.\n\n")
+
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}\n\n")
 
 def get_user_input():
     print("Enter your code below.")
-    print("Press Enter on an empty line when finished.")
+    print("Type END on a new line when finished.\n\n")
     code_lines = []
     while True:
         user_input = input()
-        if not user_input:
+        if user_input.upper() == "END":
             break
         code_lines.append(user_input)
 
@@ -49,11 +66,11 @@ def explain_code():
         Explain the following Python code.
 
         Requirements:
-        - Summarize what it does
-        - Explain the important parts
-        - Identify potentially confusing parts
-        - Mention any potential issues, but do not focus on fixing
-        - Use code snippets if they help make an explanation clearer
+        - Summarize what it does.
+        - Explain the important parts.
+        - Identify potentially confusing parts.
+        - Mention any potential issues, but do not focus on fixing. If there are no major issues, say so instead of inventing issues.
+        - Use code snippets if they help make an explanation clearer.
 
         Code:
         {code}
@@ -74,9 +91,9 @@ def find_bugs():
         If you don't find any obvious issues, say so rather than inventing issues.
 
         For each issue you find:
-        - Identify the affected part of the code
-        - Explain why it is a problem
-        - Suggest a fix and explain why it fixes the issue
+        - Identify the affected part of the code.
+        - Explain why it is a problem.
+        - Suggest a fix and explain why it fixes the issue.
 
         Code:
         {code}
