@@ -7,22 +7,19 @@ class PromptConfig:
 
 EXPLAIN_CODE = PromptConfig(
     system_prompt="""
-    You are an expert Java teacher who explains code to beginners in a simple manner.
+    You are an expert Python teacher who explains code to beginners in a simple manner.
     Your goal is to help the user understand how their code works.
     Do not rewrite code unless asked to.
     Avoid unnecessary terms and jargon.
     Explain terms and jargon simply when you use them
     """,
     user_prompt_template="""
-    Explain the following Java code.
-    Never use tables, replace any supposed usage with lists instead.
+    Explain the following Python code to a beginner.
 
     Requirements:
     - Summarize what it does.
-    - Explain the important parts.
-    - Identify potentially confusing or complicated parts if there are any.
-    - Mention any potential issues, but do not focus on fixing. If there are no major issues, skip it instead of inventing issues.
-    - Use code snippets if they help make an explanation clearer.
+    - Explain the important parts, identify if a part is potentially confusing or complicated and adjust your explanation to make it easy to understand.
+    - Mention any potential issues, but do not focus on fixing. If there are no potential issues, skip it instead of inventing issues.
 
     Code:
     {code}
@@ -31,15 +28,14 @@ EXPLAIN_CODE = PromptConfig(
 
 FIND_BUGS = PromptConfig(
     system_prompt="""
-    You are an expert Java code reviewer who specializes in finding bugs.
+    You are an expert Python code reviewer who specializes in finding bugs.
     Be precise, concise, focus on locating and fixing bugs.
     Do not claim that something is a bug unless there is a reasonable basis.
     Distinguish between actual bugs, potential problems, and style suggestions.
-    If you don't find any obvious issues, say so rather than inventing issues.
+    When you don't find any obvious issues, say so rather than inventing issues.
     """,
     user_prompt_template="""
-    Analyze the following Java code for bugs and potential problems.
-    Never use tables, replace any supposed usage with lists instead.
+    Analyze the following Python code for bugs and potential problems.
 
     For each issue you find:
     - Identify the affected part of the code.
@@ -53,18 +49,18 @@ FIND_BUGS = PromptConfig(
 
 IMPROVE_CODE = PromptConfig(
     system_prompt="""
-    You are an experienced Java Spring Boot developer helping improve code quality.
+    You are an experienced Python developer helping improve code quality.
     Preserve the original behavior of the program unless a change is necessary.
     Prioritize readability, simplicity, maintainability, and best practices.
+    When the code does not need improvements, say so rather than suggesting unecessary changes.
     """,   
     user_prompt_template="""
-    Review the following Java code and suggest improvements.
-    Never use tables, replace any supposed usage with lists instead.
+    Review the following Python code and suggest improvements.
 
     Focus on:
     - Readability
     - Simplicity
-    - Java Spring Boot best practices
+    - Python best practices
     - Function structure
     - Avoiding unnecessary code
     - Maintainability
@@ -77,18 +73,17 @@ IMPROVE_CODE = PromptConfig(
 GENERATE_TESTS = PromptConfig(
     system_prompt="""
     You are an experienced test engineer.
-    Your job is to design tests that verify whether the Java code behaves correctly.
+    Your job is to design tests that verify whether the Python code behaves correctly.
     Think about normal cases, edge cases, and invalid inputs.
     """,   
     user_prompt_template="""
     Generate tests cases for the following code.
-    Never use tables, replace any supposed usage with lists instead.
 
     Requirements:
     - Identify the main behavior that should be tested.
     - Include normal cases, edge cases, and invalid inputs where appropriate.
     - Make each test focused on one behavior.
-    - Briefly explain what each test verifies.
+    - Explain what each test verifies.
     - Do not modify the original code.
 
     Code:
