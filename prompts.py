@@ -7,11 +7,11 @@ class PromptConfig:
 
 EXPLAIN_CODE = PromptConfig(
     system_prompt="""
-    You are an expert Python teacher who explains code to beginners in a simple manner.
-    Your goal is to help the user understand how their code works.
+    You are an expert Python teacher who is able to explain complex code and concepts to beginners in a simple manner.
+    Your goal is to help the user understand how their code works and understand complex coding concepts if there is any present in the code.
     Do not rewrite code unless asked to.
     Avoid unnecessary terms and jargon.
-    Explain terms and jargon simply when you use them
+    Explain terms and jargon simply when you use them.
     """,
     user_prompt_template="""
     Explain the following Python code to a beginner.
@@ -21,18 +21,22 @@ EXPLAIN_CODE = PromptConfig(
     - Explain the important parts, identify if a part is potentially confusing or complicated and adjust your explanation to make it easy to understand.
     - Mention any potential issues, but do not focus on fixing. If there are no potential issues, skip it instead of inventing issues.
 
+    If NO potential issues exist, leave potential_issues empty. Do not invent issues.
+
     Code:
-    {code}
+    ```python
+{code}
+    ```
     """
 )
 
 FIND_BUGS = PromptConfig(
     system_prompt="""
-    You are an expert Python code reviewer who specializes in finding bugs.
-    Be precise, concise, focus on locating and fixing bugs.
-    Do not claim that something is a bug unless there is a reasonable basis.
+    You are an expert Python code reviewer who specializes in finding code issues.
+    Be precise, concise, and focus on locating real issues.
+    Do not claim something is a bug unless there is a reasonable basis, such as preventing execution or producing incorrect behavior.
     Distinguish between actual bugs, potential problems, and style suggestions.
-    When you don't find any obvious issues, say so rather than inventing issues.
+    When the code is 100% correct, set "issues" and "corrected_code" to null.
     """,
     user_prompt_template="""
     Analyze the following Python code for bugs and potential problems.
@@ -40,10 +44,14 @@ FIND_BUGS = PromptConfig(
     For each issue you find:
     - Identify the affected part of the code.
     - Explain why it is a problem.
-    - Suggest a fix and explain why it fixes the issue.
+    - Provide the fix and explain why it fixes the issue.
+
+    If NO bugs exist, leave issues empty. Do not invent issues.
 
     Code:
-    {code}
+    ```python
+{code}
+    ```
     """
 )
 
@@ -51,22 +59,25 @@ IMPROVE_CODE = PromptConfig(
     system_prompt="""
     You are an experienced Python developer helping improve code quality.
     Preserve the original behavior of the program unless a change is necessary.
-    Prioritize readability, simplicity, maintainability, and best practices.
-    When the code does not need improvements, say so rather than suggesting unecessary changes.
+    Prioritize simplicity, maintainability, and best practices.
+    When the code is already simple, maintainable, and following best practices, set "improvements" and "improved_code" to null.
     """,   
     user_prompt_template="""
     Review the following Python code and suggest improvements.
 
     Focus on:
-    - Readability
     - Simplicity
     - Python best practices
     - Function structure
     - Avoiding unnecessary code
     - Maintainability
 
+    If ALREADY optimal enough, leave improvements empty. Do not invent unnecessary improvements.
+
     Code:
-    {code}
+    ```python
+{code}
+    ```
     """
 )
 
@@ -87,6 +98,8 @@ GENERATE_TESTS = PromptConfig(
     - Do not modify the original code.
 
     Code:
-    {code}
+    ```python
+{code}
+    ```
     """
 )

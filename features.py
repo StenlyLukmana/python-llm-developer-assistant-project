@@ -18,11 +18,10 @@ def llm_api_call(
         user_prompt_template: str, 
         response_model: Type[BaseModel],
         model: str = default_model, 
-    ) -> Optional[BaseModel]:
+    ) -> tuple[BaseModel,None] | tuple[None, str]:
     code = get_user_input()
     if not code.strip():
-        print("No code detected, please try again.\n\n")
-        return None
+        return None, "No code detected, please try again."
     
     try:
         response = client.chat.completions.create(
@@ -41,19 +40,15 @@ def llm_api_call(
         )
 
         raw_json = response.choices[0].message.content
-        return response_model.model_validate_json(raw_json)
+        return response_model.model_validate_json(raw_json), None
 
     except (APIConnectionError, APITimeoutError, RateLimitError) as e:
-        print(f"Network error communicating with Groq: {e}")
-        return None
+        return None, f"Network error communicating with Groq: {e}"
     except ValidationError as e:
-        print(f"[Pydantic caught {e.error_count()} validation error(s)!]")
-        for error in e.errors():
-            print(f"- Field '{'->'.join(str(x) for x in error['loc'])}': {error['msg']}")
-        return None
+        err_details = "\n".join([f"- Field '{'->'.join(str(x) for x in error['loc'])}': {error['msg']}" for error in e.errors()])
+        return None, f"[Pydantic caught {e.error_count()} validation error(s)!]\n{err_details}"
     except Exception as e:
-        print(f"An unexpected error occurred: {e}\n\n")
-        return None
+        return None, f"An unexpected error occurred: {e}\n\n"
 
 def get_user_input() -> str:
     print("Enter your code below.")
@@ -61,14 +56,14 @@ def get_user_input() -> str:
     return sys.stdin.read()
 
 def explain_code():
-    report = llm_api_call(
+    report, error = llm_api_call(
         system_prompt=prompts.EXPLAIN_CODE.system_prompt,
         user_prompt_template=prompts.EXPLAIN_CODE.user_prompt_template,
         response_model=schemas.ExplainCodeReport,
     )
 
-    if not report:
-        print("Could not generate code review report.")
+    if error:
+        print(f"Error: {error}\n")
         return
 
     print("================")
@@ -90,61 +85,70 @@ def explain_code():
 
 
 def find_bugs():
-    report = llm_api_call(
+    report, error = llm_api_call(
         system_prompt=prompts.FIND_BUGS.system_prompt,
         user_prompt_template=prompts.FIND_BUGS.user_prompt_template,
         response_model=schemas.FindBugsReport,
     )
 
-    if not report:
-        print("Could not generate code review report.")
+    if error:
+        print(f"Error: {error}\n")
         return
 
     print("==========")
     print("BUG REPORT")
     print("==========")
-    for issue in report.issues:
-        print(f"--> [{issue.issue_type.upper()}] At Line {issue.line_number}: {issue.problem}")
-        print(f"Explanation: {issue.explanation}")
-        print(f"Fix: {issue.fix}")
-        print(f"    {issue.fix_implementation}\n")
-    print("\n=== Corrected Code ===")
-    print(f"{report.corrected_code}\n")
+    if report.issues:
+        for issue in report.issues:
+            print(f"--> [{issue.issue_type.upper()}] At Line {issue.line_number}: {issue.problem}")
+            print(f"Explanation: {issue.explanation}")
+            print(f"Fix: {issue.fix}")
+            print(f"    {issue.fix_implementation}\n")
+        print("\n=== Corrected Code ===")
+        print(f"{report.corrected_code}\n")
+    else:
+        print("No bugs found")
+
     print("")
 
+
 def improve_code():
-    report = llm_api_call(
+    report, error = llm_api_call(
         system_prompt=prompts.IMPROVE_CODE.system_prompt,
         user_prompt_template=prompts.IMPROVE_CODE.user_prompt_template,
         response_model=schemas.ImproveCodeReport,
     )
 
-    if not report:
-        print("Could not generate code review report.")
+    if error:
+        print(f"Error: {error}\n")
         return
 
     print("=========================")
     print("IMPROVEMENT SUGGESTION(S)")
     print("=========================")
-    for improvement in report.improvements:
-        print(f"--> [{improvement.improvement_type.upper()}] At Line {improvement.line_number}: {improvement.problem}")
-        print(f"Explanation: {improvement.explanation}")
-        print(f"Improvement: {improvement.improvement}")
-        print(f"    {improvement.imrpovement_implementation}\n")
-    print("\n=== Improved Code ===")
-    print(f"{report.improved_code}\n")
+    if report.improvements:
+        for improvement in report.improvements:
+            print(f"--> [{improvement.improvement_type.upper()}] At Line {improvement.line_number}: {improvement.problem}")
+            print(f"Explanation: {improvement.explanation}")
+            print(f"Improvement: {improvement.improvement}")
+            print(f"    {improvement.improvement_implementation}\n")
+    else:
+        print("No improvements needed")
+    if report.improved_code:
+        print("\n=== Improved Code ===")
+        print(f"{report.improved_code}\n")
     print("")
 
 
 def generate_tests():
-    report = llm_api_call(
+    report, error = llm_api_call(
         system_prompt=prompts.GENERATE_TESTS.system_prompt,
         user_prompt_template=prompts.GENERATE_TESTS.user_prompt_template,
         response_model=schemas.GenerateTestsReport,
     )
 
-    if not report:
-        print("Could not generate code review report.")
+    if error:
+        print(f"Error: {error}\n")
         return
 
     print("============")
