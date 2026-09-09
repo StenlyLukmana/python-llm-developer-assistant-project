@@ -103,7 +103,7 @@ def find_bugs():
             print(f"--> [{issue.issue_type.upper()}] At Line {issue.line_number}: {issue.problem}")
             print(f"Explanation: {issue.explanation}")
             print(f"Fix: {issue.fix}")
-            print(f"    {issue.fix_implementation}\n")
+            print(f"{issue.fix_implementation}\n")
         print("\n=== Corrected Code ===")
         print(f"{report.corrected_code}\n")
     else:
@@ -131,7 +131,7 @@ def improve_code():
             print(f"--> [{improvement.improvement_type.upper()}] At Line {improvement.line_number}: {improvement.problem}")
             print(f"Explanation: {improvement.explanation}")
             print(f"Improvement: {improvement.improvement}")
-            print(f"    {improvement.improvement_implementation}\n")
+            print(f"{improvement.improvement_implementation}\n")
     else:
         print("No improvements needed")
     if report.improved_code:
@@ -157,5 +157,5 @@ def generate_tests():
     for test in report.tests:
         print(f"--> [{test.description}]")
         print(f"Purpose: {test.purpose}")
-        print(f"    {test.test_code}\n")
+        print(f"{test.test_code}\n")
     print("")
